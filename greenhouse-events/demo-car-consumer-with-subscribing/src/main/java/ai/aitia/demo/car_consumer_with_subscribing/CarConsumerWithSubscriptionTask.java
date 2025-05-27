@@ -104,19 +104,19 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 								
 							} else {
 								logger.info("Recieved publisher destroyed event - started shuting down.");
-								logger.info("Temperature: " + event.getPayload() + "Cº");
+								logger.info("Humidity: " + event.getPayload() + "%");
 
-								if(Integer.parseInt(event.getPayload()) > 30 || Integer.parseInt(event.getPayload()) < 17) {
+								if(Integer.parseInt(event.getPayload()) < 50) {
 
 									String value = "ON";
-									if(Integer.parseInt(event.getPayload()) > 30) {
+									if(Integer.parseInt(event.getPayload()) > 50) {
 										value = "OFF";
 									}
 									// Create the request body
 									String requestBody = "{"
-										+ "\"idShort\":\"Heater\","
+										+ "\"idShort\":\"Watering\","
 										+ "\"identification\":{"
-										+ "\"id\":\"HeaterID\","
+										+ "\"id\":\"WateringID\","
 										+ "\"idType\":\"Custom\""
 										+ "},"
 										+ "\"endpoints\":[{"
@@ -145,7 +145,7 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 
 									// Make a PUT request to the endpoint
 									RestTemplate restTemplate = new RestTemplate();
-									String url = "http://localhost:8082/registry/api/v1/registry/HeaterID";
+									String url = "http://localhost:8082/registry/api/v1/registry/WateringID";
 									try {
 										ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 										logger.info("Response from PUT request: " + response.getBody());
@@ -153,7 +153,7 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 										logger.error("Error making PUT request", e);
 									}
 								} else {
-									logger.info("Temperature is normal. Heater is working fine.");
+									logger.info("Humidity is normal. Watering is working fine.");
 
 								}
 								//System.exit(0);

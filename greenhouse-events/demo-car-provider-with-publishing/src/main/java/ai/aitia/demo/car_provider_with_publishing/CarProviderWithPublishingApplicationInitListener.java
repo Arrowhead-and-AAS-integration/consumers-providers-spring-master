@@ -151,7 +151,7 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 
 		// Make a GET request to the endpoint
 		RestTemplate restTemplate = new RestTemplate();
-		String url = "http://localhost:8082/registry/api/v1/registry/TemperatureSensorID/submodels";
+		String url = "http://localhost:8082/registry/api/v1/registry/HumiditySensorID/submodels";
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		String submodelId = "0";
