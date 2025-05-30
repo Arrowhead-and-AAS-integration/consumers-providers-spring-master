@@ -166,6 +166,7 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 				for (JsonNode submodel : root) {
 					if ("humiditylevels".equalsIgnoreCase(submodel.path("idShort").asText())) {
 						submodelValue = submodel.path("value").asText();
+						final String payload = String.valueOf(submodelValue);
 						logger.info("Submodel humiditylevels value: " + submodelValue);
 						break;
 					}
@@ -178,8 +179,6 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 		}
 
 		final Map<String,String> metadata = null;
-
-		final String payload = String.valueOf(submodelValue);
 		final String timeStamp = Utilities.convertZonedDateTimeToUTCString( ZonedDateTime.now() );
 		
 		final EventPublishRequestDTO publishRequestDTO = new EventPublishRequestDTO(
