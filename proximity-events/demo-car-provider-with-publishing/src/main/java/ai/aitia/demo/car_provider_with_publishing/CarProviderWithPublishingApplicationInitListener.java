@@ -154,18 +154,22 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 		String url = "http://localhost:8082/registry/api/v1/registry/ProximitySensorID/submodels";
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-		String submodelId = "0";
+		String proximityValue = "0";
 
 		logger.info(response.getBody());
 
-		// Parse the JSON response to get submodel.identification.id
+		// Parse the JSON response to get the value of the submodel with idShort "ProximityData"
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
 			JsonNode root = objectMapper.readTree(response.getBody());
 			if (root.isArray() && root.size() > 0) {
-				JsonNode firstElement = root.get(0);
-				submodelId = firstElement.path("value").asText();
-				logger.info("Submodel Identification ID: " + submodelId);
+				for (JsonNode submodel : root) {
+					if ("ProximityData".equalsIgnoreCase(submodel.path("idShort").asText())) {
+						proximityValue = submodel.path("value").asText();
+						logger.info("Submodel ProximityData value: " + proximityValue);
+						break;
+					}
+				}
 			} else {
 				logger.warn("No submodel found in the response");
 			}
@@ -175,7 +179,7 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 
 		final Map<String,String> metadata = null;
 
-		final String payload = String.valueOf(submodelId);
+		final String payload = String.valueOf(proximityValue);
 		final String timeStamp = Utilities.convertZonedDateTimeToUTCString( ZonedDateTime.now() );
 		
 		final EventPublishRequestDTO publishRequestDTO = new EventPublishRequestDTO(
