@@ -179,6 +179,8 @@ public class CarProviderWithPublishingApplicationInitListener extends Applicatio
 		}
 
 		final Map<String,String> metadata = null;
+
+		final String payload = submodelValue;
 		final String timeStamp = Utilities.convertZonedDateTimeToUTCString( ZonedDateTime.now() );
 		
 		final EventPublishRequestDTO publishRequestDTO = new EventPublishRequestDTO(
