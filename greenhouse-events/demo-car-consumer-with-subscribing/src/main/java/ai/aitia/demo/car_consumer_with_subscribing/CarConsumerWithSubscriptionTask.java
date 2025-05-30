@@ -106,57 +106,48 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 								logger.info("Recieved publisher destroyed event - started shuting down.");
 								logger.info("Humidity: " + event.getPayload() + "%");
 
-								if(Integer.parseInt(event.getPayload()) < 50) {
+								String value = Integer.parseInt(event.getPayload()) < 50 ? "ON" : "OFF";
 
-									String value = "ON";
-									if(Integer.parseInt(event.getPayload()) > 50) {
-										value = "OFF";
-									}
-									// Create the request body
-									String requestBody = "{"
-										+ "\"idShort\":\"Watering\","
-										+ "\"identification\":{"
-										+ "\"id\":\"WateringID\","
-										+ "\"idType\":\"Custom\""
-										+ "},"
-										+ "\"endpoints\":[{"
-										+ "\"type\":\"http\","
-										+ "\"address\":\"http://localhost:5081/\""
-										+ "}],"
-										+ "\"submodels\":[{"
-										+ "\"idShort\":\"State\","
-										+ "\"identification\":{"
-										+ "\"id\":\"StateID\""
-										+ "},"
-										+ "\"value\":\"" + value + "\","
-										+ "\"endpoints\":[{"
-										+ "\"type\":\"http\","
-										+ "\"address\":\"http://localhost:5081/aas/submodels/StateID\""
-										+ "}]"
-										+ "}]"
-										+ "}";
+								// Create the request body
+								String requestBody = "{"
+									+ "\"idShort\":\"Watering\","
+									+ "\"identification\":{"
+									+ "\"id\":\"WateringID\","
+									+ "\"idType\":\"Custom\""
+									+ "},"
+									+ "\"endpoints\":[{"
+									+ "\"type\":\"http\","
+									+ "\"address\":\"http://localhost:5081/\""
+									+ "}],"
+									+ "\"submodels\":[{"
+									+ "\"idShort\":\"State\","
+									+ "\"identification\":{"
+									+ "\"id\":\"StateID\""
+									+ "},"
+									+ "\"value\":\"" + value + "\","
+									+ "\"endpoints\":[{"
+									+ "\"type\":\"http\","
+									+ "\"address\":\"http://localhost:5081/aas/submodels/StateID\""
+									+ "}]"
+									+ "}]"
+									+ "}";
 
-									// Set the headers
-									HttpHeaders headers = new HttpHeaders();
-									headers.setContentType(MediaType.APPLICATION_JSON);
+								// Set the headers
+								HttpHeaders headers = new HttpHeaders();
+								headers.setContentType(MediaType.APPLICATION_JSON);
 
-									// Create the HttpEntity
-									HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+								// Create the HttpEntity
+								HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
-									// Make a PUT request to the endpoint
-									RestTemplate restTemplate = new RestTemplate();
-									String url = "http://localhost:8082/registry/api/v1/registry/WateringID";
-									try {
-										ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
-										logger.info("Response from PUT request: " + response.getBody());
-									} catch (Exception e) {
-										logger.error("Error making PUT request", e);
-									}
-								} else {
-									logger.info("Humidity is normal. Watering is working fine.");
-
+								// Make a PUT request to the endpoint
+								RestTemplate restTemplate = new RestTemplate();
+								String url = "http://localhost:8082/registry/api/v1/registry/WateringID";
+								try {
+									ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+									logger.info("Response from PUT request: " + response.getBody());
+								} catch (Exception e) {
+									logger.error("Error making PUT request", e);
 								}
-								//System.exit(0);
 							}
 						} else {
 							logger.info("ConsumerTask recevied event - with type: " + event.getEventType() + ", and payload: " + event.getPayload() + ".");

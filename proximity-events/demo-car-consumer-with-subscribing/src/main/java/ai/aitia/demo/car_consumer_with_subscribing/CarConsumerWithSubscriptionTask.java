@@ -105,58 +105,48 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 							} else {
 								logger.info("Recieved publisher destroyed event - started shuting down.");
 								logger.info("Proximity: " + event.getPayload() + "cm");
+								String value = Integer.parseInt(event.getPayload()) < 30 ? "ON" : "OFF";
 
-								if(Integer.parseInt(event.getPayload()) < 50) {
+								// Create the request body
+								String requestBody = "{"
+									+ "\"idShort\":\"WindmillMotor\","
+									+ "\"identification\":{"
+									+ "\"id\":\"WindmillMotorID\","
+									+ "\"idType\":\"Custom\""
+									+ "},"
+									+ "\"endpoints\":[{"
+									+ "\"type\":\"http\","
+									+ "\"address\":\"http://localhost:5081/\""
+									+ "}],"
+									+ "\"submodels\":[{"
+									+ "\"idShort\":\"State\","
+									+ "\"identification\":{"
+									+ "\"id\":\"StateID\""
+									+ "},"
+									+ "\"value\":\"" + value + "\","
+									+ "\"endpoints\":[{"
+									+ "\"type\":\"http\","
+									+ "\"address\":\"http://localhost:5081/aas/submodels/StateID\""
+									+ "}]"
+									+ "}]"
+									+ "}";
 
-									String value = "ON";
-									if(Integer.parseInt(event.getPayload()) > 50) {
-										value = "OFF";
-									}
-									// Create the request body
-									String requestBody = "{"
-										+ "\"idShort\":\"WindmillMotor\","
-										+ "\"identification\":{"
-										+ "\"id\":\"WindmillMotorID\","
-										+ "\"idType\":\"Custom\""
-										+ "},"
-										+ "\"endpoints\":[{"
-										+ "\"type\":\"http\","
-										+ "\"address\":\"http://localhost:5081/\""
-										+ "}],"
-										+ "\"submodels\":[{"
-										+ "\"idShort\":\"State\","
-										+ "\"identification\":{"
-										+ "\"id\":\"StateID\""
-										+ "},"
-										+ "\"value\":\"" + value + "\","
-										+ "\"endpoints\":[{"
-										+ "\"type\":\"http\","
-										+ "\"address\":\"http://localhost:5081/aas/submodels/StateID\""
-										+ "}]"
-										+ "}]"
-										+ "}";
+								// Set the headers
+								HttpHeaders headers = new HttpHeaders();
+								headers.setContentType(MediaType.APPLICATION_JSON);
 
-									// Set the headers
-									HttpHeaders headers = new HttpHeaders();
-									headers.setContentType(MediaType.APPLICATION_JSON);
+								// Create the HttpEntity
+								HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
-									// Create the HttpEntity
-									HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-									// Make a PUT request to the endpoint
-									RestTemplate restTemplate = new RestTemplate();
-									String url = "http://localhost:8082/registry/api/v1/registry/WindmillMotorID";
-									try {
-										ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
-										logger.info("Response from PUT request: " + response.getBody());
-									} catch (Exception e) {
-										logger.error("Error making PUT request", e);
-									}
-								} else {
-									logger.info("Everyone is far. Windmill motor is working fine.");
-
+								// Make a PUT request to the endpoint
+								RestTemplate restTemplate = new RestTemplate();
+								String url = "http://localhost:8082/registry/api/v1/registry/WindmillMotorID";
+								try {
+									ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+									logger.info("Response from PUT request: " + response.getBody());
+								} catch (Exception e) {
+									logger.error("Error making PUT request", e);
 								}
-								//System.exit(0);
 							}
 						} else {
 							logger.info("ConsumerTask recevied event - with type: " + event.getEventType() + ", and payload: " + event.getPayload() + ".");
