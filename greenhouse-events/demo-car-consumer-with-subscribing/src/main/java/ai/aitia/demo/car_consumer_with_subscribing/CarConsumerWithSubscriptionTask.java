@@ -106,7 +106,31 @@ public class CarConsumerWithSubscriptionTask extends Thread {
 								logger.info("Recieved publisher destroyed event - started shuting down.");
 								logger.info("Humidity: " + event.getPayload() + "%");
 
-								String value = Integer.parseInt(event.getPayload()) < 50 ? "ON" : "OFF";
+								// Obtener el límite dinámicamente desde el submodelo AlertLimit de HumiditySensor
+								int limit = 50; // valor por defecto
+								try {
+									RestTemplate restTemplate = new RestTemplate();
+									String assetsUrl = "http://localhost:8082/registry/api/v1/registry";
+									ResponseEntity<String> assetsResponse = restTemplate.getForEntity(assetsUrl, String.class);
+									String assetsJson = assetsResponse.getBody();
+
+									// Buscar el asset HumiditySensor y su submodelo AlertLimit
+									com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(assetsJson);
+									for (com.fasterxml.jackson.databind.JsonNode asset : root) {
+										if ("HumiditySensor".equals(asset.path("idShort").asText())) {
+											for (com.fasterxml.jackson.databind.JsonNode submodel : asset.path("submodels")) {
+												if ("AlertLimit".equals(submodel.path("idShort").asText())) {
+													String valueStr = submodel.path("value").asText();
+													limit = Integer.parseInt(valueStr);
+												}
+											}
+										}
+									}
+								} catch (Exception e) {
+									logger.error("No se pudo obtener el límite dinámico, usando 50 por defecto", e);
+								}
+
+								String value = Integer.parseInt(event.getPayload()) < limit ? "ON" : "OFF";
 
 								// Create the request body
 								String requestBody = "{"
